@@ -3,39 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Gastos</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.js"></script>
+    <title>Gestor de Crédito</title>
+    
+    <!-- Iconos de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Enlace correcto al CSS -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>Gestogr de Gastos</h1>
-    <form id="entry-form">
-        <label for="amount">Monto:</label>
-        <input type="number" id="amount" required>
-        <label for="date">Fecha:</label>
-        <input type="date" id="date" required>
-        <label for="type">Tipo:</label>
-        <select id="type">
-            <option value="gasto">Gasto</option>
-            <option value="abono">Abono</option>
-        </select>
-        <button type="submit">Agregar</button>
-    </form>
-
-    <table id="daily-tracker">
-        <thead>
+    <!-- Información General -->
+    <section class="summary">
+        <table>
             <tr>
-                <th>Tipo</th>
-                <th>Fecha</th>
-                <th>Monto</th>
-                <th>Acción</th>
+                <th>Credito</th>
+                <th>Pendiente</th>
+                <th id="pending">$0.00</th>
             </tr>
-        </thead>
-        <tbody>
-            <!-- Aquí se cargarán los registros -->
-        </tbody>
-    </table>
+            <tr>
+                <td>$2,400.00</td>
+                <td>Total Gastado</td>
+                <td id="total-spent" class="total-spent">$0.00</td>
+            </tr>
+            <tr>
+                <td>Corte 18 Mes</td>
+                <td>Total Pagado</td>
+                <td id="total-paid" class="total-paid">$0.00</td>
+            </tr>
+        </table>
+    </section>
 
-    <script src="script.js"></script>
+    <!-- Información del Banco y Fecha Límite -->
+    <section class="bank-info">
+        <div class="credit-card">
+            <p>CREDITO RESTANTE</p>
+            <p id="remaining-credit" class="remaining-credit">$2,400.00</p>
+        </div>
+        <button class="date-limit">Fecha Límite 17 de mayo</button>
+    </section>
+
+    <!-- Formulario de Registro -->
+    <section class="form-section">
+        <form id="entry-form">
+            <div class="form-group">
+                <label for="amount"><span class="icon">$</span> Monto:</label>
+                <input type="number" id="amount" step="0.01" placeholder="Ingrese el monto" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="date"><span class="icon">📅</span> Fecha:</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group half">
+                    <label for="type"><span class="icon">↔</span> Tipo:</label>
+                    <select id="type" required>
+                        <option value="gasto">Gasto </option>
+                        <option value="pago">Pago Abonado (-)</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-plus"></i> Agregar Registro
+            </button>
+        </form>
+    </section>
+
+    <!-- Notificación Emergente -->
+    <div id="notification" class="hidden">
+        <span id="notification-message"></span>
+        <button id="close-notification" class="close-btn">&times;</button>
+    </div>
+
+    <!-- Tabla de Registros -->
+    <section class="table-section">
+        <div class="table-header">
+            <h2>Seguimiento Diario</h2>
+            <button id="clear-all" class="clear-btn">Limpiar Todo</button>
+        </div>
+        <table id="daily-tracker">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Las filas se agregarán dinámicamente -->
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Enlace correcto al JS -->
+    <script src="js/index.js"></script>
 </body>
-</html>
+                        </html>
+                        
