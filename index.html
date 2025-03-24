@@ -75,28 +75,22 @@
     </div>
 
     <!-- Tabla de Registros -->
-    <section class="table-section">
-        <div class="table-header">
-            <h2>Seguimiento Diario</h2>
-            <button id="clear-all" class="clear-btn">Limpiar Todo</button>
-        </div>
-        <table id="daily-tracker">
-            <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Fecha</th>
-                    <th>Monto</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Las filas se agregarán dinámicamente -->
-            </tbody>
-        </table>
-    </section>
-
-    <!-- Enlace correcto al JS -->
-    <script src="js/index.js"></script>
-</body>
-                        </html>
-                        
+<section class="table-section">
+    <div class="table-header">
+        <h2>Seguimiento </h2>
+        <button id="clear-all" class="clear-btn">Limpiar Todo</button>
+    </div>
+    <table id="daily-tracker">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Las filas se agregarán dinámicamente desde Supabase -->
+        </tbody>
+    </table>
+</section>
