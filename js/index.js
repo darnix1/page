@@ -39,15 +39,35 @@ function saveDataToLocalStorage(data) {
     localStorage.setItem("creditData", JSON.stringify(data));
 }
 
-// Cargar datos desde localStorage
+// Cargar datos desde localStorage y recalcular totales
 function loadDataFromLocalStorage() {
     const savedData = localStorage.getItem("creditData");
     if (savedData) {
         const data = JSON.parse(savedData);
+
+        // Reiniciar los valores antes de recalcular
+        pending = 0;
+        totalSpent = 0;
+        totalPaid = 0;
+        remainingCredit = 2400; // Valor inicial
+
         data.forEach((row) => {
-            addRowToTable(row.type, row.date, row.amount, false); // No recalculamos totales aquí
+            addRowToTable(row.type, row.date, row.amount, false); // Agregar sin actualizar totales
+
+            // Recalcular los valores
+            if (row.type === "gasto") {
+                totalSpent += row.amount;
+                pending += row.amount;
+                remainingCredit -= row.amount;
+            } else if (row.type === "pago") {
+                totalPaid -= row.amount;
+                pending -= row.amount;
+                remainingCredit += row.amount;
+            }
         });
-        updateTotals(); // Recalculamos los totales después de cargar los datos
+
+        // Actualizar la interfaz con los valores corregidos
+        updateTotals();
     }
 }
 
@@ -197,3 +217,4 @@ document.getElementById("entry-form").addEventListener("submit", function (e) {
 window.addEventListener("load", () => {
     loadDataFromLocalStorage();
 });
+    
