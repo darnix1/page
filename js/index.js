@@ -1,197 +1,83 @@
-// Variables globales para almacenar los totales
-let pending = 0; // Crédito pendiente
-let totalSpent = 0; // Total gastado
-let totalPaid = 0; // Total pagado
-let remainingCredit = 2400; // Crédito restante (inicial)
+// Configuración de Supabase
+const supabase = createClient('https://opyosxtaqpiuaquritch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9weW9zeHRhcXBpdWFxdXJpdGNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3ODU0MzcsImV4cCI6MjA1ODM2MTQzN30.tUiV5xs9vx6vUucDf_lk2QnAvO-LPbz0h44qPhOd7bM);
 
-// Elementos del DOM
-const notification = document.getElementById("notification");
+// Función para agregar un registro
+async function addTransaction(type, amount, date) {
+    const { data, error } = await supabase
+        .from('transactions')
+        .insert([{ type, amount, date }]);
 
-// Abrir la base de datos IndexedDB
-let db;
-const request = indexedDB.open("CreditManagerDB", 1);
-
-request.onupgradeneeded = function (event) {
-    db = event.target.result;
-    if (!db.objectStoreNames.contains("transactions")) {
-        db.createObjectStore("transactions", { keyPath: "id", autoIncrement: true });
+    if (error) {
+        alert('Error al agregar el registro');
+    } else {
+        showNotification('Registro agregado correctamente');
+        loadTransactions();
     }
-};
-
-request.onsuccess = function (event) {
-    db = event.target.result;
-    loadDataFromIndexedDB(); // Cargar datos al iniciar
-};
-
-request.onerror = function () {
-    console.error("Error al abrir IndexedDB");
-};
-
-// Mostrar notificación
-function showNotification(message) {
-    notification.classList.remove("hidden");
-    notification.classList.add("visible");
-    document.getElementById("notification-message").textContent = message;
-
-    setTimeout(() => {
-        hideNotification();
-    }, 3000);
 }
 
-// Ocultar notificación
-function hideNotification() {
-    notification.classList.remove("visible");
-    notification.classList.add("hidden");
-}
+// Función para obtener los registros y actualizar la tabla
+async function loadTransactions() {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('*');
 
-// Actualizar los totales en la interfaz
-function updateTotals() {
-    document.getElementById("pending").textContent = `$${pending.toFixed(2)}`;
-    document.getElementById("total-spent").textContent = `$${totalSpent.toFixed(2)}`;
-    document.getElementById("total-paid").textContent = `$${Math.abs(totalPaid).toFixed(2)}`;
-    document.getElementById("remaining-credit").textContent = `$${remainingCredit.toFixed(2)}`;
-}
+    if (error) {
+        alert('Error al cargar los registros');
+    } else {
+        const tableBody = document.querySelector("#daily-tracker tbody");
+        tableBody.innerHTML = '';  // Limpiar la tabla antes de agregar nuevos registros
 
-// Guardar datos en IndexedDB
-function saveDataToIndexedDB(transaction) {
-    const transactionStore = db.transaction("transactions", "readwrite").objectStore("transactions");
-    transactionStore.add(transaction);
-}
+        data.forEach(row => {
+            const newRow = document.createElement("tr");
 
-// Cargar datos desde IndexedDB
-function loadDataFromIndexedDB() {
-    const transactionStore = db.transaction("transactions", "readonly").objectStore("transactions");
-    const request = transactionStore.getAll();
+            // Crear las celdas
+            const typeCell = document.createElement("td");
+            typeCell.textContent = row.type === 'gasto' ? 'Gasto' : 'Abono';
+            const dateCell = document.createElement("td");
+            dateCell.textContent = row.date;
+            const amountCell = document.createElement("td");
+            amountCell.textContent = row.type === 'gasto' ? `+${row.amount}` : `-${row.amount}`;
+            const actionCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-btn";
+            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            deleteButton.onclick = () => deleteTransaction(row.id);
+            actionCell.appendChild(deleteButton);
 
-    request.onsuccess = function () {
-        const transactions = request.result;
-        transactions.forEach((row) => {
-            addRowToTable(row.type, row.date, row.amount, false); // No recalculamos totales aquí
+            // Agregar celdas a la fila
+            newRow.appendChild(typeCell);
+            newRow.appendChild(dateCell);
+            newRow.appendChild(amountCell);
+            newRow.appendChild(actionCell);
+            tableBody.appendChild(newRow);
         });
-        updateTotals(); // Recalcular totales después de cargar los datos
-    };
-}
-
-// Agregar una fila a la tabla
-function addRowToTable(type, date, amount, updateTotalsFlag = true) {
-    const tableBody = document.querySelector("#daily-tracker tbody");
-    const newRow = document.createElement("tr");
-
-    const typeCell = document.createElement("td");
-    typeCell.textContent = type === "gasto" ? "Gasto" : "Abono";
-
-    const dateCell = document.createElement("td");
-    dateCell.textContent = date;
-
-    const amountCell = document.createElement("td");
-    amountCell.textContent = type === "gasto" ? `+${amount.toFixed(2)}` : `-${Math.abs(amount).toFixed(2)}`;
-
-    const actionCell = document.createElement("td");
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "delete-btn";
-    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-    deleteButton.onclick = () => removeRow(deleteButton, type, amount, date);
-    actionCell.appendChild(deleteButton);
-
-    newRow.appendChild(typeCell);
-    newRow.appendChild(dateCell);
-    newRow.appendChild(amountCell);
-    newRow.appendChild(actionCell);
-
-    tableBody.appendChild(newRow);
-
-    if (updateTotalsFlag) {
-        if (type === "gasto") {
-            totalSpent += amount;
-            pending += amount;
-            remainingCredit -= amount;
-        } else if (type === "pago") {
-            totalPaid -= amount;
-            pending -= amount;
-            remainingCredit += amount;
-        }
-        updateTotals();
-        saveDataToIndexedDB({ type, date, amount });
     }
 }
 
-// Eliminar una fila de la tabla
-function removeRow(button, type, amount, date) {
-    const row = button.closest("tr");
-    row.remove();
+// Función para eliminar un registro
+async function deleteTransaction(id) {
+    const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id);
 
-    if (type === "gasto") {
-        totalSpent -= Math.abs(amount);
-        pending -= Math.abs(amount);
-        remainingCredit += Math.abs(amount);
-    } else if (type === "pago") {
-        totalPaid += Math.abs(amount);
-        pending += Math.abs(amount);
-        remainingCredit -= Math.abs(amount);
+    if (error) {
+        alert('Error al eliminar el registro');
+    } else {
+        showNotification('Registro eliminado correctamente');
+        loadTransactions();
     }
-
-    updateTotals();
-
-    // Eliminar de IndexedDB
-    const transactionStore = db.transaction("transactions", "readwrite").objectStore("transactions");
-    const request = transactionStore.openCursor();
-
-    request.onsuccess = function (event) {
-        const cursor = event.target.result;
-        if (cursor) {
-            if (cursor.value.type === type && cursor.value.amount === amount && cursor.value.date === date) {
-                cursor.delete();
-                return;
-            }
-            cursor.continue();
-        }
-    };
-
-    showNotification("Registro eliminado correctamente");
 }
 
-// Limpiar todos los datos
-document.getElementById("clear-all").addEventListener("click", () => {
-    const confirmation = confirm("¿Estás seguro de que deseas limpiar todos los registros?");
-    if (confirmation) {
-        const transactionStore = db.transaction("transactions", "readwrite").objectStore("transactions");
-        transactionStore.clear();
+// Al cargar la página, cargar los registros
+window.addEventListener("load", loadTransactions);
 
-        document.querySelector("#daily-tracker tbody").innerHTML = "";
-
-        pending = 0;
-        totalSpent = 0;
-        totalPaid = 0;
-        remainingCredit = 2400;
-        updateTotals();
-
-        showNotification("Todos los registros han sido eliminados");
-    }
-});
-
-// Agregar un nuevo registro a la tabla
+// Enviar datos del formulario
 document.getElementById("entry-form").addEventListener("submit", function (e) {
     e.preventDefault();
-
     const amount = parseFloat(document.getElementById("amount").value);
     const date = document.getElementById("date").value;
     const type = document.getElementById("type").value;
-
-    if (!amount || !date || !type) {
-        alert("Por favor, completa todos los campos.");
-        return;
-    }
-
-    addRowToTable(type, date, amount);
-
+    addTransaction(type, amount, date);
     document.getElementById("entry-form").reset();
-    showNotification("Registro agregado correctamente");
 });
-
-// Cargar datos al iniciar la página
-window.addEventListener("load", () => {
-    if (db) {
-        loadDataFromIndexedDB();
-    }
-});
-                                                
