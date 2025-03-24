@@ -1,11 +1,13 @@
-let pending = 0; // Crédito pendiente
-let totalSpent = 0; // Total gastado
-let totalPaid = 0; // Total pagado
-let remainingCredit = 2400; // Crédito restante (inicial)
+//const jsonBinUrl = "https://api.jsonbin.io/v3/b/67e174cb8561e97a50f1ed57"; // Reemplaza con tu URL
+//const jsonBinKey = "$2a$10$d4NXRsjStC0Oouw5e8ylt.qGg74c53bPHKU9VbI7PKMTSMyXvWfvK"; // Reemplaza con tu API Key 
+// Variables de Totales
+let pending = 0;
+let totalSpent = 0;
+let totalPaid = 0;
+let remainingCredit = 2400;
 
-// URL de JSONBin.io
+// URL de JSONBin
 const jsonBinUrl = "https://api.jsonbin.io/v3/b/67e174cb8561e97a50f1ed57"; // Reemplaza con tu URL
-
 const jsonBinKey = "$2a$10$d4NXRsjStC0Oouw5e8ylt.qGg74c53bPHKU9VbI7PKMTSMyXvWfvK"; // Reemplaza con tu API Key
 
 const notification = document.getElementById("notification");
@@ -45,10 +47,13 @@ async function loadDataFromJSON() {
         const result = await response.json();
         const data = result.record;
 
-        data.forEach((row) => {
-            addRowToTable(row.type, row.date, row.amount, false); // No recalculamos totales aquí
-        });
-        updateTotals(); // Recalculamos los totales después de cargar los datos
+        if (data && data.length > 0) {
+            // Agregar los registros a la tabla y actualizar los totales
+            data.forEach((row) => {
+                addRowToTable(row.type, row.date, row.amount, false); // No recalcular totales al cargar
+            });
+        }
+        updateTotals(); // Recalcular totales después de cargar los datos
     } catch (error) {
         console.error("Error al cargar los datos:", error);
     }
@@ -171,4 +176,5 @@ document.getElementById("entry-form").addEventListener("submit", (e) => {
 document.getElementById("close-notification").addEventListener("click", hideNotification);
 
 // Cargar datos al cargar la página
-loadDataFromJSON();
+window.addEventListener("load", loadDataFromJSON);
+                              
