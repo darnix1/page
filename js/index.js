@@ -1,12 +1,11 @@
-// Variables globales para almacenar los totales
+// Variables globales para los totales
 let pending = 0; // Crédito pendiente
 let totalSpent = 0; // Total gastado
 let totalPaid = 0; // Total pagado
-let remainingCredit = 2400; // Crédito restante (inicial)
+let remainingCredit = 2400; // Crédito restante inicial
 
 // Elementos del DOM
 const notification = document.getElementById("notification");
-const closeNotification = document.getElementById("close-notification");
 
 // Mostrar notificación
 function showNotification(message) {
@@ -14,23 +13,17 @@ function showNotification(message) {
     notification.classList.add("visible");
     document.getElementById("notification-message").textContent = message;
 
-    // Ocultar automáticamente después de 3 segundos
     setTimeout(() => {
-        hideNotification();
+        notification.classList.remove("visible");
+        notification.classList.add("hidden");
     }, 3000);
-}
-
-// Ocultar notificación
-function hideNotification() {
-    notification.classList.remove("visible");
-    notification.classList.add("hidden");
 }
 
 // Actualizar los totales en la interfaz
 function updateTotals() {
     document.getElementById("pending").textContent = `$${pending.toFixed(2)}`;
     document.getElementById("total-spent").textContent = `$${totalSpent.toFixed(2)}`;
-    document.getElementById("total-paid").textContent = `$${Math.abs(totalPaid).toFixed(2)}`;
+    document.getElementById("total-paid").textContent = `$${totalPaid.toFixed(2)}`;
     document.getElementById("remaining-credit").textContent = `$${remainingCredit.toFixed(2)}`;
 }
 
@@ -39,7 +32,7 @@ function saveDataToLocalStorage(data) {
     localStorage.setItem("creditData", JSON.stringify(data));
 }
 
-// Cargar datos desde localStorage y recalcular totales
+// Cargar datos y recalcular totales
 function loadDataFromLocalStorage() {
     const savedData = localStorage.getItem("creditData");
     if (savedData) {
@@ -51,22 +44,22 @@ function loadDataFromLocalStorage() {
         totalPaid = 0;
         remainingCredit = 2400; // Valor inicial
 
-        data.forEach((row) => {
-            addRowToTable(row.type, row.date, row.amount, false); // Agregar sin actualizar totales
+        document.querySelector("#daily-tracker tbody").innerHTML = ""; // Limpiar tabla antes de cargar
 
-            // Recalcular los valores
+        data.forEach((row) => {
+            addRowToTable(row.type, row.date, row.amount, false);
+
             if (row.type === "gasto") {
                 totalSpent += row.amount;
                 pending += row.amount;
                 remainingCredit -= row.amount;
             } else if (row.type === "pago") {
-                totalPaid -= row.amount;
+                totalPaid += row.amount;
                 pending -= row.amount;
                 remainingCredit += row.amount;
             }
         });
 
-        // Actualizar la interfaz con los valores corregidos
         updateTotals();
     }
 }
@@ -76,19 +69,15 @@ function addRowToTable(type, date, amount, updateTotalsFlag = true) {
     const tableBody = document.querySelector("#daily-tracker tbody");
     const newRow = document.createElement("tr");
 
-    // Tipo de transacción
     const typeCell = document.createElement("td");
     typeCell.textContent = type === "gasto" ? "Gasto" : "Abono";
 
-    // Fecha
     const dateCell = document.createElement("td");
     dateCell.textContent = date;
 
-    // Monto
     const amountCell = document.createElement("td");
     amountCell.textContent = type === "gasto" ? `+${amount.toFixed(2)}` : `-${Math.abs(amount).toFixed(2)}`;
 
-    // Acciones
     const actionCell = document.createElement("td");
     const deleteButton = document.createElement("button");
     deleteButton.className = "delete-btn";
@@ -96,61 +85,51 @@ function addRowToTable(type, date, amount, updateTotalsFlag = true) {
     deleteButton.onclick = () => removeRow(deleteButton);
     actionCell.appendChild(deleteButton);
 
-    // Agregar celdas a la fila
     newRow.appendChild(typeCell);
     newRow.appendChild(dateCell);
     newRow.appendChild(amountCell);
     newRow.appendChild(actionCell);
-
-    // Agregar la fila a la tabla
     tableBody.appendChild(newRow);
 
-    // Actualizar los totales si es necesario
     if (updateTotalsFlag) {
         if (type === "gasto") {
             totalSpent += amount;
             pending += amount;
             remainingCredit -= amount;
         } else if (type === "pago") {
-            totalPaid -= amount;
+            totalPaid += amount;
             pending -= amount;
             remainingCredit += amount;
         }
         updateTotals();
     }
 
-    // Guardar los datos en localStorage
     const rowData = { type, date, amount };
     const existingData = JSON.parse(localStorage.getItem("creditData")) || [];
     existingData.push(rowData);
     saveDataToLocalStorage(existingData);
 }
 
-// Eliminar una fila de la tabla
+// Eliminar una fila
 function removeRow(button) {
     const row = button.closest("tr");
     const typeCell = row.querySelector("td:nth-child(1)").textContent.trim();
     const amountCell = row.querySelector("td:nth-child(3)").textContent.trim();
     const amount = parseFloat(amountCell.replace(/[^-\d.]/g, ""));
 
-    // Restaurar los totales según el tipo de entrada
     if (typeCell === "Gasto") {
-        totalSpent -= Math.abs(amount);
-        pending -= Math.abs(amount);
-        remainingCredit += Math.abs(amount);
+        totalSpent -= amount;
+        pending -= amount;
+        remainingCredit += amount;
     } else if (typeCell === "Abono") {
-        totalPaid += Math.abs(amount);
-        pending += Math.abs(amount);
-        remainingCredit -= Math.abs(amount);
+        totalPaid -= amount;
+        pending += amount;
+        remainingCredit -= amount;
     }
 
-    // Eliminar la fila
     row.remove();
-
-    // Actualizar los totales
     updateTotals();
 
-    // Actualizar localStorage
     const existingData = JSON.parse(localStorage.getItem("creditData")) || [];
     const updatedData = existingData.filter(
         (data) =>
@@ -161,35 +140,24 @@ function removeRow(button) {
             )
     );
     saveDataToLocalStorage(updatedData);
-
-    // Mostrar notificación
     showNotification("Registro eliminado correctamente");
 }
 
 // Limpiar todos los datos
 document.getElementById("clear-all").addEventListener("click", () => {
-    const confirmation = confirm("¿Estás seguro de que deseas limpiar todos los registros?");
-    if (confirmation) {
-        // Limpiar la tabla
-        const tableBody = document.querySelector("#daily-tracker tbody");
-        tableBody.innerHTML = "";
-
-        // Reiniciar los totales
+    if (confirm("¿Estás seguro de que deseas limpiar todos los registros?")) {
+        document.querySelector("#daily-tracker tbody").innerHTML = "";
         pending = 0;
         totalSpent = 0;
         totalPaid = 0;
         remainingCredit = 2400;
         updateTotals();
-
-        // Limpiar localStorage
         localStorage.removeItem("creditData");
-
-        // Mostrar notificación
         showNotification("Todos los registros han sido eliminados");
     }
 });
 
-// Agregar un nuevo registro a la tabla
+// Agregar un nuevo registro
 document.getElementById("entry-form").addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -197,19 +165,13 @@ document.getElementById("entry-form").addEventListener("submit", function (e) {
     const date = document.getElementById("date").value;
     const type = document.getElementById("type").value;
 
-    // Validar campos
     if (!amount || !date || !type) {
         alert("Por favor, completa todos los campos.");
         return;
     }
 
-    // Agregar la fila a la tabla
     addRowToTable(type, date, amount);
-
-    // Limpiar el formulario
     document.getElementById("entry-form").reset();
-
-    // Mostrar notificación
     showNotification("Registro agregado correctamente");
 });
 
@@ -217,4 +179,4 @@ document.getElementById("entry-form").addEventListener("submit", function (e) {
 window.addEventListener("load", () => {
     loadDataFromLocalStorage();
 });
-    
+            
