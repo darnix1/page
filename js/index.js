@@ -1,10 +1,13 @@
-// Variables globales para almacenar los totales
 let pending = 0; // Crédito pendiente
 let totalSpent = 0; // Total gastado
 let totalPaid = 0; // Total pagado
 let remainingCredit = 2400; // Crédito restante (inicial)
 
-// Elementos del DOM
+// URL de JSONBin.io
+const jsonBinUrl = "https://api.jsonbin.io/v3/b/67e174cb8561e97a50f1ed57"; // Reemplaza con tu URL
+
+const jsonBinKey = "$2a$10$d4NXRsjStC0Oouw5e8ylt.qGg74c53bPHKU9VbI7PKMTSMyXvWfvK"; // Reemplaza con tu API Key
+
 const notification = document.getElementById("notification");
 const closeNotification = document.getElementById("close-notification");
 
@@ -14,7 +17,6 @@ function showNotification(message) {
     notification.classList.add("visible");
     document.getElementById("notification-message").textContent = message;
 
-    // Ocultar automáticamente después de 3 segundos
     setTimeout(() => {
         hideNotification();
     }, 3000);
@@ -34,20 +36,37 @@ function updateTotals() {
     document.getElementById("remaining-credit").textContent = `$${remainingCredit.toFixed(2)}`;
 }
 
-// Guardar datos en localStorage
-function saveDataToLocalStorage(data) {
-    localStorage.setItem("creditData", JSON.stringify(data));
-}
+// Cargar datos desde JSONBin
+async function loadDataFromJSON() {
+    try {
+        const response = await fetch(jsonBinUrl, {
+            headers: { "X-Master-Key": jsonBinKey }
+        });
+        const result = await response.json();
+        const data = result.record;
 
-// Cargar datos desde localStorage
-function loadDataFromLocalStorage() {
-    const savedData = localStorage.getItem("creditData");
-    if (savedData) {
-        const data = JSON.parse(savedData);
         data.forEach((row) => {
             addRowToTable(row.type, row.date, row.amount, false); // No recalculamos totales aquí
         });
         updateTotals(); // Recalculamos los totales después de cargar los datos
+    } catch (error) {
+        console.error("Error al cargar los datos:", error);
+    }
+}
+
+// Guardar datos en JSONBin
+async function saveDataToJSON(data) {
+    try {
+        await fetch(jsonBinUrl, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": jsonBinKey
+            },
+            body: JSON.stringify({ record: data })
+        });
+    } catch (error) {
+        console.error("Error al guardar los datos:", error);
     }
 }
 
@@ -56,19 +75,15 @@ function addRowToTable(type, date, amount, updateTotalsFlag = true) {
     const tableBody = document.querySelector("#daily-tracker tbody");
     const newRow = document.createElement("tr");
 
-    // Tipo de transacción
     const typeCell = document.createElement("td");
     typeCell.textContent = type === "gasto" ? "Gasto" : "Abono";
 
-    // Fecha
     const dateCell = document.createElement("td");
     dateCell.textContent = date;
 
-    // Monto
     const amountCell = document.createElement("td");
     amountCell.textContent = type === "gasto" ? `+${amount.toFixed(2)}` : `-${Math.abs(amount).toFixed(2)}`;
 
-    // Acciones
     const actionCell = document.createElement("td");
     const deleteButton = document.createElement("button");
     deleteButton.className = "delete-btn";
@@ -76,16 +91,13 @@ function addRowToTable(type, date, amount, updateTotalsFlag = true) {
     deleteButton.onclick = () => removeRow(deleteButton);
     actionCell.appendChild(deleteButton);
 
-    // Agregar celdas a la fila
     newRow.appendChild(typeCell);
     newRow.appendChild(dateCell);
     newRow.appendChild(amountCell);
     newRow.appendChild(actionCell);
 
-    // Agregar la fila a la tabla
     tableBody.appendChild(newRow);
 
-    // Actualizar los totales si es necesario
     if (updateTotalsFlag) {
         if (type === "gasto") {
             totalSpent += amount;
@@ -99,11 +111,10 @@ function addRowToTable(type, date, amount, updateTotalsFlag = true) {
         updateTotals();
     }
 
-    // Guardar los datos en localStorage
     const rowData = { type, date, amount };
     const existingData = JSON.parse(localStorage.getItem("creditData")) || [];
     existingData.push(rowData);
-    saveDataToLocalStorage(existingData);
+    saveDataToJSON(existingData);
 }
 
 // Eliminar una fila de la tabla
@@ -111,89 +122,53 @@ function removeRow(button) {
     const row = button.closest("tr");
     const typeCell = row.querySelector("td:nth-child(1)").textContent.trim();
     const amountCell = row.querySelector("td:nth-child(3)").textContent.trim();
-    const amount = parseFloat(amountCell.replace(/[^-\d.]/g, ""));
+    const amount = parseFloat(amountCell.replace(/[^\d.-]/g, ""));
+    const dateCell = row.querySelector("td:nth-child(2)").textContent.trim();
 
-    // Restaurar los totales según el tipo de entrada
-    if (typeCell === "Gasto") {
-        totalSpent -= Math.abs(amount);
-        pending -= Math.abs(amount);
-        remainingCredit += Math.abs(amount);
-    } else if (typeCell === "Abono") {
-        totalPaid += Math.abs(amount);
-        pending += Math.abs(amount);
-        remainingCredit -= Math.abs(amount);
-    }
-
-    // Eliminar la fila
     row.remove();
 
-    // Actualizar los totales
+    if (typeCell === "Gasto") {
+        totalSpent -= amount;
+        pending -= amount;
+        remainingCredit += amount;
+    } else if (typeCell === "Abono") {
+        totalPaid += amount;
+        pending += amount;
+        remainingCredit -= amount;
+    }
+
     updateTotals();
 
-    // Actualizar localStorage
-    const existingData = JSON.parse(localStorage.getItem("creditData")) || [];
-    const updatedData = existingData.filter(
-        (data) =>
-            !(
-                data.type === (typeCell === "Gasto" ? "gasto" : "pago") &&
-                data.date === row.querySelector("td:nth-child(2)").textContent &&
-                data.amount === amount
-            )
-    );
-    saveDataToLocalStorage(updatedData);
-
-    // Mostrar notificación
-    showNotification("Registro eliminado correctamente");
+    // Actualizar en JSONBin
+    loadDataFromJSON();
 }
 
-// Limpiar todos los datos
+// Limpiar todo
 document.getElementById("clear-all").addEventListener("click", () => {
-    const confirmation = confirm("¿Estás seguro de que deseas limpiar todos los registros?");
-    if (confirmation) {
-        // Limpiar la tabla
-        const tableBody = document.querySelector("#daily-tracker tbody");
-        tableBody.innerHTML = "";
-
-        // Reiniciar los totales
-        pending = 0;
-        totalSpent = 0;
-        totalPaid = 0;
-        remainingCredit = 2400;
-        updateTotals();
-
-        // Limpiar localStorage
-        localStorage.removeItem("creditData");
-
-        // Mostrar notificación
-        showNotification("Todos los registros han sido eliminados");
-    }
+    localStorage.removeItem("creditData");
+    loadDataFromJSON();
 });
 
-// Agregar un nuevo registro a la tabla
-document.getElementById("entry-form").addEventListener("submit", function (e) {
+// Formulario para agregar una entrada
+document.getElementById("entry-form").addEventListener("submit", (e) => {
     e.preventDefault();
 
     const amount = parseFloat(document.getElementById("amount").value);
     const date = document.getElementById("date").value;
     const type = document.getElementById("type").value;
 
-    // Validar campos
-    if (!amount || !date || !type) {
-        alert("Por favor, completa todos los campos.");
+    if (isNaN(amount) || !date || !type) {
+        showNotification("Por favor complete todos los campos.");
         return;
     }
 
-    // Agregar la fila a la tabla
     addRowToTable(type, date, amount);
-
-    // Limpiar el formulario
-    document.getElementById("entry-form").reset();
-
-    // Mostrar notificación
-    showNotification("Registro agregado correctamente");
+    document.getElementById("amount").value = "";
+    document.getElementById("date").value = "";
+    document.getElementById("type").value = "gasto";
 });
 
-// Cargar datos al iniciar la página
-window.addEventListener("load", () => {
-    loadDataFromLocalStorage();
-});
+document.getElementById("close-notification").addEventListener("click", hideNotification);
+
+// Cargar datos al cargar la página
+loadDataFromJSON();
