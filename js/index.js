@@ -1,83 +1,73 @@
-// Configuración de Supabase
-const supabase = createClient('https://opyosxtaqpiuaquritch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9weW9zeHRhcXBpdWFxdXJpdGNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3ODU0MzcsImV4cCI6MjA1ODM2MTQzN30.tUiV5xs9vx6vUucDf_lk2QnAvO-LPbz0h44qPhOd7bM);
+d("entry-form").reset();
+});
+// Configura el cliente de Supabase
+const supabaseUrl = 'https://opyosxtaqpiuaquritch.supabase.co'; // Tu URL de Supabase
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9weW9zeHRhcXBpdWFxdXJpdGNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3ODU0MzcsImV4cCI6MjA1ODM2MTQzN30.tUiV5xs9vx6vUucDf_lk2QnAvO-LPbz0h44qPhOd7bM'; // Tu clave pública de Supabase
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Función para agregar un registro
-async function addTransaction(type, amount, date) {
+// Cargar registros de la base de datos y mostrarlos en la tabla
+async function cargarRegistros() {
     const { data, error } = await supabase
-        .from('transactions')
-        .insert([{ type, amount, date }]);
+        .from('registros') // Nombre de la tabla en Supabase
+        .select('*'); // Seleccionar todos los registros
 
     if (error) {
-        alert('Error al agregar el registro');
+        console.error('Error al cargar los registros:', error);
     } else {
-        showNotification('Registro agregado correctamente');
-        loadTransactions();
-    }
-}
+        const tableBody = document.querySelector('#daily-tracker tbody');
+        tableBody.innerHTML = ''; // Vaciar la tabla antes de agregar nuevos registros
 
-// Función para obtener los registros y actualizar la tabla
-async function loadTransactions() {
-    const { data, error } = await supabase
-        .from('transactions')
-        .select('*');
-
-    if (error) {
-        alert('Error al cargar los registros');
-    } else {
-        const tableBody = document.querySelector("#daily-tracker tbody");
-        tableBody.innerHTML = '';  // Limpiar la tabla antes de agregar nuevos registros
-
-        data.forEach(row => {
-            const newRow = document.createElement("tr");
-
-            // Crear las celdas
-            const typeCell = document.createElement("td");
-            typeCell.textContent = row.type === 'gasto' ? 'Gasto' : 'Abono';
-            const dateCell = document.createElement("td");
-            dateCell.textContent = row.date;
-            const amountCell = document.createElement("td");
-            amountCell.textContent = row.type === 'gasto' ? `+${row.amount}` : `-${row.amount}`;
-            const actionCell = document.createElement("td");
-            const deleteButton = document.createElement("button");
-            deleteButton.className = "delete-btn";
-            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-            deleteButton.onclick = () => deleteTransaction(row.id);
-            actionCell.appendChild(deleteButton);
-
-            // Agregar celdas a la fila
-            newRow.appendChild(typeCell);
-            newRow.appendChild(dateCell);
-            newRow.appendChild(amountCell);
-            newRow.appendChild(actionCell);
-            tableBody.appendChild(newRow);
+        // Mostrar los registros en la tabla
+        data.forEach(registro => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${registro.type}</td>
+                <td>${registro.date}</td>
+                <td>$${registro.amount}</td>
+                <td><button class="delete-btn" onclick="eliminarRegistro(${registro.id})">Eliminar</button></td>
+            `;
+            tableBody.appendChild(row);
         });
     }
 }
 
-// Función para eliminar un registro
-async function deleteTransaction(id) {
-    const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', id);
+// Función para agregar un nuevo registro
+document.getElementById('entry-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const amount = document.getElementById('amount').value;
+    const date = document.getElementById('date').value;
+    const type = document.getElementById('type').value;
+
+    // Insertar datos en la tabla 'registros' en Supabase
+    const { data, error } = await supabase
+        .from('registros')
+        .insert([
+            { amount: amount, date: date, type: type }
+        ]);
 
     if (error) {
-        alert('Error al eliminar el registro');
+        console.error('Error al insertar los datos:', error);
     } else {
-        showNotification('Registro eliminado correctamente');
-        loadTransactions();
+        console.log('Registro insertado con éxito:', data);
+        cargarRegistros(); // Recargar los registros para mostrar el nuevo
+    }
+});
+
+// Función para eliminar un registro
+async function eliminarRegistro(id) {
+    const { data, error } = await supabase
+        .from('registros')
+        .delete()
+        .eq('id', id); // Eliminar el registro por su ID
+
+    if (error) {
+        console.error('Error al eliminar el registro:', error);
+    } else {
+        console.log('Registro eliminado:', data);
+        cargarRegistros(); // Recargar los registros después de eliminar
     }
 }
 
-// Al cargar la página, cargar los registros
-window.addEventListener("load", loadTransactions);
-
-// Enviar datos del formulario
-document.getElementById("entry-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    const amount = parseFloat(document.getElementById("amount").value);
-    const date = document.getElementById("date").value;
-    const type = document.getElementById("type").value;
-    addTransaction(type, amount, date);
-    document.getElementById("entry-form").reset();
-});
+// Llamar la función para cargar los registros al inicio
+cargarRegistros();
