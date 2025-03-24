@@ -16,7 +16,7 @@
     <section class="summary">
         <table>
             <tr>
-                <th>Credito</th>
+                <th>CREDITO</th>
                 <th>Pendiente</th>
                 <th id="pending">$0.00</th>
             </tr>
@@ -36,6 +36,7 @@
     <!-- Información del Banco y Fecha Límite -->
     <section class="bank-info">
         <div class="credit-card">
+            <p>BBVA TDC</p>
             <p>CREDITO RESTANTE</p>
             <p id="remaining-credit" class="remaining-credit">$2,400.00</p>
         </div>
@@ -57,7 +58,7 @@
                 <div class="form-group half">
                     <label for="type"><span class="icon">↔</span> Tipo:</label>
                     <select id="type" required>
-                        <option value="gasto">Gasto </option>
+                        <option value="gasto">Gasto (+)</option>
                         <option value="pago">Pago Abonado (-)</option>
                     </select>
                 </div>
@@ -75,22 +76,27 @@
     </div>
 
     <!-- Tabla de Registros -->
-<section class="table-section">
-    <div class="table-header">
-        <h2>Seguimiento </h2>
-        <button id="clear-all" class="clear-btn">Limpiar Todo</button>
-    </div>
-    <table id="daily-tracker">
-        <thead>
-            <tr>
-                <th>Tipo</th>
-                <th>Fecha</th>
-                <th>Monto</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Las filas se agregarán dinámicamente desde Supabase -->
-        </tbody>
-    </table>
-</section>
+    <section class="table-section">
+        <div class="table-header">
+            <h2>Seguimiento Diario</h2>
+            <button id="clear-all" class="clear-btn">Limpiar Todo</button>
+        </div>
+        <table id="daily-tracker">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Las filas se agregarán dinámicamente -->
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Enlace correcto al JS -->
+    <script src="js/index.js"></script>
+</body>
+    </html>
