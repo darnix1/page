@@ -163,7 +163,7 @@ declare -A cpu_model=$(uname -m)
 [[ $cpu_model = "aarch64" ]] && cpu_model=" ARM64 Pro" 
 echo -e "\033[97m"
 echo -e "\033[41m     -- INSTALAREMOS LO NECESARIO PARA EL ADM --"
-echo -e "     \033[44mSU IP REGISTRADA ES : $(wget -qO- ifconfig.me)\033[41m"
+echo -e "     \033[44mSU IP REGISTRADA ES : $(curl -sS ipinfo.io/ip)\033[41m"
 echo -e "   \033[41m--  Arch : $(lscpu | grep "Vendor ID" | awk '{print $3}') SISTEMA  $(lsb_release -si) $(lsb_release -sr) --"
 echo -e "\033[100m   ATENCION A INSTALACION POR SI DEVUELVE UN ERROR "
 echo -e "\033[97m"
