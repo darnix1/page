@@ -25,7 +25,7 @@ dpkg-reconfigure --frontend noninteractive tzdata >/dev/null 2>&1
 [[ $(dpkg --get-selections|grep -w "curl"|head -1) ]] || apt install curl -y &>/dev/null
 [[ $(dpkg --get-selections|grep -w "uuid-runtime"|head -1) ]] || apt-get install uuid-runtime -y &>/dev/null
 source <(curl -sSL https://raw.githubusercontent.com/emirjorge/Script-Z/master/CHUMO/msg-bar/msg)
-_double=$(curl -sSL "https://raw.githubusercontent.com/emirjorge/Script-Z/master/CHUMO/Control/Control-Bot.txt")
+_double=$(curl -sSL "https://raw.githubusercontent.com/darnix1/permission/refs/heads/main/ipmini")
 COLS=$(tput cols)
 os_system(){ 
  system=$(cat -n /etc/issue |grep 1 |cut -d ' ' -f6,7,8 |sed 's/1//' |sed 's/      //') 
@@ -63,7 +63,7 @@ clear
 #Key="$(cat /etc/cghkey)"
 Key="$1"
 IiP="$(ofus "$Key" | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')"
-[[ ! -e /file ]] && wget -q -O /file https://raw.githubusercontent.com/emirjorge/Script-Z/master/CHUMO/Control/Control-Bot.txt
+[[ ! -e /file ]] && wget -q -O /file https://raw.githubusercontent.com/darnix1/permission/refs/heads/main/ipmini
 _double=$(cat < /file)
 _check2="$(echo -e "$_double" | grep ${IiP})"
 [[ -z ${_check2} ]] && {
@@ -370,18 +370,18 @@ number=$(expr length $1)
 for((i=1; i<$number+1; i++)); do
 txt[$i]=$(echo "$1" | cut -b $i)
 case ${txt[$i]} in
-".") txt[$i]="x";;
-"x") txt[$i]=".";;
-"5") txt[$i]="s";;
-"s") txt[$i]="5";;
-"1") txt[$i]="@";;
-"@") txt[$i]="1";;
-"2") txt[$i]="?";;
-"?") txt[$i]="2";;
-"4") txt[$i]="0";;
-"0") txt[$i]="4";;
-"/") txt[$i]="K";;
-"K") txt[$i]="/";;
+".")txt[$i]="x";;
+"x")txt[$i]=".";;
+"5")txt[$i]="s";;
+"s")txt[$i]="5";;
+"1")txt[$i]="@";;
+"@")txt[$i]="1";;
+"2")txt[$i]="?";;
+"?")txt[$i]="2";;
+"4")txt[$i]="0";;
+"0")txt[$i]="4";;
+"/")txt[$i]="K";;
+"K")txt[$i]="/";;
 esac
 txtofus+="${txt[$i]}"
 done
