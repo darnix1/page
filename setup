@@ -59,7 +59,7 @@ MIP2=$(wget -qO- ipv4.icanhazip.com)
 
 fun_install () {
 clear
-[[ -z ${IP} ]] && IP=$(wget -qO- ifconfig.me)
+[[ -z ${IP} ]] && IP=$(curl -sS ipinfo.io/ip)
 #Key="$(cat /etc/cghkey)"
 Key="$1"
 IiP="$(ofus "$Key" | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')"
