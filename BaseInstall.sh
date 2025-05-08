@@ -3,7 +3,7 @@
 
 
 [[ -e /file ]] && _double=$(cat < /file) ||  {
-_double=$(curl -sSL "https://raw.githubusercontent.com/emirjorge/Script-Z/master/CHUMO/Control/Control-Bot.txt")
+_double=$(curl -sSL "https://raw.githubusercontent.com/darnix1/permission/refs/heads/main/ipmini")
 echo -e "$(echo -e "$_double" | grep ${IiP})" > /file
 }
 [[ -z ${_check2} ]] && {
@@ -62,7 +62,7 @@ else
 #echo ""
 #echo -e "\t\033[92mRESELLER : "
 #echo -e "\t\e[1;33mVERSION: \e[1;31m$(cat /etc/)"
-#echo -e "\t\033[1;100mPARA MOSTAR PANEL BASH ESCRIBA:\e[0m\e[1;41m sudo menu \e[0m"
+echo -e "\t\033[1;100mPARA MOSTAR PANEL BASH ESCRIBA:\e[0m\e[1;41m sudo menu \e[0m"
 sed -i "/ADMcgh/d" /etc/bash.bashrc
 echo 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games/
 [[ -z $(locale | grep "LANG=" | cut -d "=" -f2) ]] && export LANG=en_US.UTF-8 
