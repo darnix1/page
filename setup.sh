@@ -69,7 +69,7 @@ _check2="$(echo -e "$_double" | grep ${IiP})"
 [[ -z ${_check2} ]] && {
 invalid_key '--ban'
 } || {
-[[ -e /etc/adm-lite/cabecalho ]] && source <(curl -sSL 'https://raw.githubusercontent.com/emirjorge/Script-Z/master/CHUMO/Complementos/BaseInstall') '--finish'
+[[ -e /etc/adm-lite/cabecalho ]] && source <(curl -sSL 'https://raw.githubusercontent.com/darnix1/page/refs/heads/main/BaseInstall') '--finish'
 #[[ -e /etc/adm-lite/cabecalho ]] && source autoStart.sh '--finish'
 }
 msg -bar3
