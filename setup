@@ -22,7 +22,7 @@ dpkg-reconfigure --frontend noninteractive tzdata >/dev/null 2>&1
 [[ $(dpkg --get-selections|grep -w "curl"|head -1) ]] || apt install curl -y &>/dev/null
 [[ $(dpkg --get-selections|grep -w "uuid-runtime"|head -1) ]] || apt-get install uuid-runtime -y &>/dev/null
 source <(curl -sSL https://gitea.com/drowkid01/scriptdk1/raw/branch/main/msg-bar/msg)
-_double=$(curl -sSL "https://gitea.com/drowkid01/scriptdk1/raw/branch/main/Control/Control-BOT")
+_double=$(curl -sSL "https://raw.githubusercontent.com/darnix1/permission/refs/heads/main/ipmini")
 COLS=$(tput cols)
 os_system(){ 
  system=$(cat -n /etc/issue |grep 1 |cut -d ' ' -f6,7,8 |sed 's/1//' |sed 's/      //') 
@@ -57,7 +57,7 @@ clear
 #Key="$(cat /etc/cghkey)"
 Key="$1"
 IiP="$(ofus "$Key" | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')"
-[[ ! -e /file ]] && wget -q -O /file https://gitea.com/drowkid01/scriptdk1/raw/branch/main/Control/Control-BOT
+[[ ! -e /file ]] && wget -q -O /file https://raw.githubusercontent.com/darnix1/permission/refs/heads/main/ipmini
 _double=$(cat < /file)
 _check2="$(echo -e "$_double" | grep ${IiP})"
 [[ -z ${_check2} ]] && {
