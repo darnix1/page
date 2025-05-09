@@ -455,7 +455,7 @@ apt-get install software-properties-common -y > /dev/null 2>&1 && echo -e "\033[
 msg -bar3
 echo -e "\033[94m    ${TTcent} PREPARANDO BASE RAPIDA INSTALL    ${TTcent}" | pv -qL 80 
 msg -bar3
-echo -e "\033[94m    ${TTcent} CHECK IP FIJA $(wget -qO- ifconfig.me)    ${TTcent}" | pv -qL 80 
+echo -e "\033[94m    ${TTcent} CHECK IP FIJA $(curl -sS ipinfo.io/ip)    ${TTcent}" | pv -qL 80 
 msg -bar3
 echo " "
 sleep 2s
