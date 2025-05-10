@@ -323,27 +323,27 @@ Install_key() {
   }
   ofus() {
     unset server
-      #server=$(echo ${txt_ofuscatw} | cut -d':' -f1)
-      unset txtofus
-      number=$(expr length $1)
-      for ((i = 1; i < $number + 1; i++)); do
+    server=$(echo ${txt_ofuscatw} | cut -d':' -f1)
+    unset txtofus
+    number=$(expr length $1)
+    for ((i = 1; i < $number + 1; i++)); do
         txt[$i]=$(echo "$1" | cut -b $i)
         case ${txt[$i]} in
-        ".") txt[$i]="v" ;;
-        "v") txt[$i]="." ;;
-        "1") txt[$i]="@" ;;
-        "@") txt[$i]="1" ;;
-        "2") txt[$i]="?" ;;
-        "?") txt[$i]="2" ;;
-        "4") txt[$i]="p" ;;
-        "p") txt[$i]="4" ;;
-        "-") txt[$i]="L" ;;
-        "L") txt[$i]="-" ;;
+            ".") txt[$i]="v" ;;
+            "v") txt[$i]="." ;;
+            "1") txt[$i]="@" ;;
+            "@") txt[$i]="1" ;;
+            "2") txt[$i]="?" ;;
+            "?") txt[$i]="2" ;;
+            "4") txt[$i]="p" ;;
+            "p") txt[$i]="4" ;;
+            "-") txt[$i]="L" ;;
+            "L") txt[$i]="-" ;;
         esac
         txtofus+="${txt[$i]}"
-      done
-      echo "$txtofus" | rev
-    }
+    done
+    echo "$txtofus" | rev
+}
   verificar_arq() {
     case $1 in
     "menu.sh" | "message.txt") ARQ="${SCPdir}/" ;;
