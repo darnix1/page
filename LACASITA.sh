@@ -112,7 +112,7 @@ apt-get install pv -y &> /dev/null
 [[ $(dpkg --get-selections|grep -w "pv"|head -1) ]] || apt-get install pv -y &>/dev/null
 apt-get install pv -y -qq --silent > /dev/null 2>&1
 os_system
-MI=$(wget -qO- ifconfig.me)
+MI=$(wget -qO- ipv4.icanhazip.com)
 echo "$distro $vercion" >/tmp/distro
 echo -e "\e[1;31m	🖥SISTEMA: \e[33m$distro $vercion   " 
 echo -e "\e[1;31m	🖥IP: \e[33m$MI   "
@@ -396,11 +396,11 @@ clear
 clear
 fun_ipe () {
 MIP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
-MIP2=$(wget -qO- ifconfig.me)
+MIP2=$(wget -qO- ipv4.icanhazip.com)
 [[ "$MIP" != "$MIP2" ]] && IP="$MIP2" || IP="$MIP"
 }  
 fun_ip () {
-MIP2=$(wget -qO- ifconfig.me)
+MIP2=$(wget -qO- ipv4.icanhazip.com)
 
 MIP=$(wget -qO- whatismyip.akamai.com)
 if [ $? -eq 0 ]; then
