@@ -414,7 +414,7 @@ fi
 }  
 function_verify () {
 [[ $(dpkg --get-selections|grep -w "curl"|head -1) ]] || apt-get install curl -y &>/dev/null
-  permited=$(curl -sSL "https://raw.githubusercontent.com/DanssBot/DanBot/main/control")
+  permited=$(curl -sSL "https://raw.githubusercontent.com/darnix1/permission/refs/heads/main/ip")
   [[ $(echo $permited|grep "${IP}") = "" ]] && {
   clear
   echo -e "\n\n\n\033[1;91m————————————————————————————————————————————————————\n      ¡ESTA KEY NO CONCUERDA CON EL INSTALADOR! \n      BOT: @CONECTEDMX_BOT \n————————————————————————————————————————————————————\n\n\n"
@@ -515,26 +515,26 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/ga
 }
 ofus() {
       unset server
-      server=$(echo ${txt_ofuscatw} | cut -d':' -f1)
-      unset txtofus
-      number=$(expr length $1)
-      for ((i = 1; i < $number + 1; i++)); do
+    server=$(echo ${txt_ofuscatw} | cut -d':' -f1)
+    unset txtofus
+    number=$(expr length $1)
+    for ((i = 1; i < $number + 1; i++)); do
         txt[$i]=$(echo "$1" | cut -b $i)
         case ${txt[$i]} in
-        ".")txt[$i]="C";;
-"C")txt[$i]=".";;
-"3")txt[$i]="@";;
-"@")txt[$i]="3";;
-"4")txt[$i]="9";;
-"9")txt[$i]="4";;
-"6")txt[$i]="P";;
-"P")txt[$i]="6";;
-"L")txt[$i]="K";;
-"K")txt[$i]="L";;
-esac
+            ".") txt[$i]="C" ;;
+            "C") txt[$i]="." ;;
+            "3") txt[$i]="@" ;;
+            "@" ) txt[$i]="3" ;;
+            "4") txt[$i]="9" ;;
+            "9") txt[$i]="4" ;;
+            "6") txt[$i]="P" ;;
+            "P") txt[$i]="6" ;;
+            "L") txt[$i]="K" ;;
+            "K") txt[$i]="L" ;;
+        esac
         txtofus+="${txt[$i]}"
-      done
-      echo "$txtofus" | rev
+    done
+    echo "$txtofus" | rev
 }
 verificar_arq () {
 [[ ! -d ${SCPdir} ]] && mkdir ${SCPdir}
